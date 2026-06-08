@@ -32,7 +32,7 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 const rainParticles = [];
-const RAIN_TOTAL = 800;
+const RAIN_TOTAL = 1000;
 class RainParticle{
     constructor(){
         this.reset();
@@ -51,7 +51,7 @@ class RainParticle{
             Math.random() * 22 + 8;
 
         this.speed =
-            Math.random() * 3 + 1;
+            Math.random() * 8 + 4;
 
         this.opacity =
             Math.random() * 0.7 + 0.25;
@@ -179,12 +179,12 @@ class Particle{
 
         const px =
             canvas.width/2 +
-            x * 14 * beat +
+            x * 20 * beat +
             (Math.random()-0.5) * spread;
 
         const py =
             canvas.height/2 +
-            y * 14 * beat +
+            y * 20 * beat +
             (Math.random()-0.5) * spread;
 
         const alpha =
