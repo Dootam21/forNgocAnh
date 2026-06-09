@@ -75,55 +75,141 @@ window.addEventListener(
 
 // ================= RAIN =================
 
+// ================= FULLSCREEN RAIN =================
+
 const rainParticles = [];
-const RAIN_TOTAL = 1000;
+let RAIN_TOTAL = 0;
+
+function createRain(){
+
+    rainParticles.length = 0;
+
+    // mật độ mưa theo diện tích màn hình
+    const screenArea =
+        canvas.width *
+        canvas.height;
+
+    RAIN_TOTAL =
+        Math.floor(
+            screenArea / 1500
+        );
+
+    const cols =
+        Math.ceil(
+            Math.sqrt(RAIN_TOTAL)
+        );
+
+    const rows =
+        Math.ceil(
+            RAIN_TOTAL / cols
+        );
+
+    const spacingX =
+        canvas.width / cols;
+
+    const spacingY =
+        canvas.height / rows;
+
+    for(
+        let row = 0;
+        row < rows;
+        row++
+    ){
+
+        for(
+            let col = 0;
+            col < cols;
+            col++
+        ){
+
+            if(
+                rainParticles.length
+                >= RAIN_TOTAL
+            ) break;
+
+            rainParticles.push(
+                new RainParticle(
+                    col *
+                    spacingX +
+                    Math.random()
+                    * spacingX,
+
+                    row *
+                    spacingY +
+                    Math.random()
+                    * spacingY
+                )
+            );
+        }
+    }
+}
 
 class RainParticle{
 
-    constructor(){
+    constructor(x,y){
+
+        this.baseX = x;
+        this.baseY = y;
+
         this.reset();
     }
 
     reset(){
 
         this.x =
-            Math.random()
-            * canvas.width;
+            this.baseX +
+            (
+                Math.random()-0.5
+            ) * 40;
 
         this.y =
             Math.random()
             * canvas.height;
 
         this.length =
-            Math.random() * 22 + 8;
+            Math.random()
+            * 22 + 10;
 
         this.speed =
-            Math.random() * 8 + 4;
+            Math.random()
+            * 5 + 7;
 
         this.opacity =
-            Math.random() * 0.7 + 0.25;
+            Math.random()
+            * 0.4 + 0.45;
 
         this.width =
-            Math.random() * 1.5 + 0.5;
+            Math.random()
+            * 1.2 + 0.6;
     }
 
     update(){
 
         this.y += this.speed;
-        this.x += this.speed * 0.15;
+
+        // mưa chéo nhẹ
+        this.x +=
+            this.speed
+            * 0.12;
 
         if(
             this.y >
-            canvas.height + 20
+            canvas.height + 30
         ){
-            this.reset();
-            this.y = -20;
+
+            // reset từ trên trời
+            this.y =
+                -50;
+
+            this.x =
+                this.baseX +
+                (
+                    Math.random()-0.5
+                ) * 50;
         }
     }
 
     draw(){
-
-        ctx.beginPath();
 
         const gradient =
             ctx.createLinearGradient(
@@ -154,15 +240,15 @@ class RainParticle{
             "rgba(255,80,150,0)"
         );
 
+        ctx.beginPath();
+
         ctx.strokeStyle =
             gradient;
 
         ctx.lineWidth =
             this.width;
 
-        ctx.shadowBlur = 10;
-
-        ctx.beginPath();
+        ctx.shadowBlur = 12;
 
         ctx.moveTo(
             this.x,
@@ -179,16 +265,21 @@ class RainParticle{
     }
 }
 
-for(let i=0;i<RAIN_TOTAL;i++){
-    rainParticles.push(
-        new RainParticle()
-    );
-}
+createRain();
+
+// recreate khi resize
+window.addEventListener(
+    "resize",
+    ()=>{
+        resize();
+        createRain();
+    }
+);
 
 // ================= HEART =================
 
 const particles = [];
-const TOTAL = 4500;
+const TOTAL = 7000;
 
 class Particle{
 
@@ -299,27 +390,29 @@ for(let i=0;i<TOTAL;i++){
 
 // ================= TEXT ORBITS =================
 
+// ================= HEART-BASED ORBITS =================
+
 const orbitSystems = [
     {
-        text:"Ngọc Ánh",
-        radius:220,
-        speed:0.0005,
-        count:6,
-        size:12
+        text: "Ngọc Ánh",
+        radius: 11,
+        speed: 0.0005,
+        count: 6,
+        size: 12
     },
     {
-        text:"Gửi người tôi thương",
-        radius:290,
-        speed:-0.00035,
-        count:8,
-        size:14
+        text: "Gửi người tôi thương",
+        radius: 14.5,
+        speed: -0.00035,
+        count: 8,
+        size: 14
     },
     {
-        text:"Ngọc Ánh",
-        radius:360,
-        speed:0.00025,
-        count:10,
-        size:16
+        text: "Ngọc Ánh",
+        radius: 18,
+        speed: 0.00025,
+        count: 10,
+        size: 16
     }
 ];
 
@@ -331,10 +424,19 @@ function drawTextOrbits(time){
     const cy =
         canvas.height / 2;
 
+    // kích thước tim thật
+    const heartSize =
+        20 * heartScale;
+
     orbitSystems.forEach(
         orbit=>{
 
         const planets = [];
+
+        // orbit bám theo tim
+        const orbitRadius =
+            orbit.radius *
+            heartSize;
 
         for(
             let i=0;
@@ -346,32 +448,30 @@ function drawTextOrbits(time){
                 time *
                 orbit.speed +
                 (
-                    Math.PI*2
+                    Math.PI * 2
                     / orbit.count
                 ) * i;
 
             const depth =
                 Math.cos(angle);
 
-            const radius =
-                orbit.radius
-                * orbitScale;
-
             const x =
                 cx +
                 Math.sin(angle)
-                * radius;
+                * orbitRadius;
 
+            // ellipse dọc theo size tim
             const y =
                 cy +
                 Math.cos(angle)
-                * radius
+                * orbitRadius
                 * 0.28;
 
             const scale =
                 0.55 +
                 (
-                    (depth+1)/2
+                    (depth + 1)
+                    / 2
                 ) * 0.9;
 
             planets.push({
@@ -384,7 +484,7 @@ function drawTextOrbits(time){
 
         planets.sort(
             (a,b)=>
-            a.depth-b.depth
+            a.depth - b.depth
         );
 
         planets.forEach(p=>{
@@ -406,9 +506,10 @@ function drawTextOrbits(time){
                 p.scale
                 * 0.65;
 
+            // chữ scale theo tim
             const fontSize =
-                orbit.size
-                * orbitScale;
+                orbit.size *
+                heartScale;
 
             ctx.font =
                 `bold ${fontSize}px Arial`;
@@ -419,8 +520,12 @@ function drawTextOrbits(time){
             ctx.textBaseline =
                 "middle";
 
-            const paddingX = 18;
-            const paddingY = 10;
+            // padding scale theo tim
+            const paddingX =
+                18 * heartScale;
+
+            const paddingY =
+                10 * heartScale;
 
             const textWidth =
                 ctx.measureText(
@@ -442,7 +547,7 @@ function drawTextOrbits(time){
                     255,
                     80,
                     160,
-                    ${opacity*0.22}
+                    ${opacity * 0.22}
                 )`;
 
             ctx.strokeStyle =
@@ -450,17 +555,20 @@ function drawTextOrbits(time){
                     255,
                     180,
                     220,
-                    ${opacity*0.4}
+                    ${opacity * 0.4}
                 )`;
 
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth =
+                1.5 *
+                heartScale;
 
             ctx.roundRect(
-                -boxWidth/2,
-                -boxHeight/2,
+                -boxWidth / 2,
+                -boxHeight / 2,
                 boxWidth,
                 boxHeight,
-                16
+                16 *
+                heartScale
             );
 
             ctx.fill();
@@ -468,7 +576,8 @@ function drawTextOrbits(time){
 
             ctx.shadowBlur =
                 20 *
-                p.scale;
+                p.scale *
+                heartScale;
 
             ctx.shadowColor =
                 "#ff66b3";
